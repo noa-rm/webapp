@@ -1,0 +1,40 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    {{- include "noa-web-app.labels" . | nindent 4 }}
+  name: {{ include "noa-web-app.fullname" . }}
+rules:
+  - apiGroups:
+      - '*'
+    resources:
+      - namespaces
+      - deployments
+      - services
+      - pods
+    verbs:
+      - get
+      - list
+      - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    {{- include "noa-web-app.labels" . | nindent 4 }}
+  name: {{ include "noa-web-app.fullname" . }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ include "noa-web-app.fullname" . }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "noa-web-app.fullname" . }}
+    namespace: default
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    {{- include "noa-web-app.labels" . | nindent 4 }}
+  name: {{ include "noa-web-app.fullname" . }}

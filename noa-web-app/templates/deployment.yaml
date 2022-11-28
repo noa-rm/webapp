@@ -1,0 +1,59 @@
+{{- if .Values.webApp.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "noa-web-app.fullname" . }}
+  labels:
+    {{- include "noa-web-app.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.webApp.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "noa-web-app.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "noa-web-app.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.webApp.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "noa-web-app.fullname" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+          - name: http
+            containerPort: 5000
+            protocol: TCP
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- if or (.Values.webApp.nodeSelector) (.Values.global.nodeSelector) }}
+      nodeSelector:
+        {{- if .Values.webApp.nodeSelector }}
+        {{- with .Values.webApp.nodeSelector }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- else if .Values.global.nodeSelector }}
+        {{- with .Values.global.nodeSelector }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- end }}
+      {{- end }}
+      {{- with .Values.global.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.global.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end}}

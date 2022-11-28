@@ -1,0 +1,43 @@
+global:
+  nodeSelector: {}
+  ServiceAccountName: ""
+  affinity: {}
+  tolerations: []
+
+image:
+  repository: noa-web-app
+  pullPolicy: Never
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: latest
+
+webApp:
+  enabled: true
+  replicaCount: 1
+
+  imagePullSecrets: []
+  nameOverride: ""
+  fullnameOverride: ""
+  nodeSelector: {}
+
+podSecurityContext: {}
+
+securityContext: {}
+
+service:
+  type: ClusterIP
+  port: 80
+
+resources: {}
+#   limits:
+#     cpu: 20m
+#     memory: 50Mi
+#   requests:
+#     cpu: 10m
+#     memory: 30Mi
+
+# scaling requirement
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 7
+  targetCPUUtilizationPercentage: 50
